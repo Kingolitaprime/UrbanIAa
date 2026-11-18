@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}{{ 'Editar' if c else 'Nueva' }} ciudad{% endblock %}
+{% block contenido %}
+<section class="tarjeta formulario-chico">
+  <h1>{{ 'Editar ciudad' if c else 'Nueva ciudad' }}</h1>
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="nombre">Nombre</label>
+    <input id="nombre" name="nombre" required maxlength="100" value="{{ c.nombre if c else '' }}">
+    <label for="departamento_id">Departamento</label>
+    <select id="departamento_id" name="departamento_id" required>
+      {% for d in departamentos %}<option value="{{ d.id }}" {{ 'selected' if c and c.departamento_id == d.id }}>{{ d.nombre }}</option>{% endfor %}
+    </select>
+    <label for="cluster">Cluster</label>
+    <input id="cluster" name="cluster" required maxlength="100" value="{{ c.cluster if c else '' }}" list="lista-clusters">
+    <datalist id="lista-clusters">
+      {% for k in ['Gran Córdoba','Valle de Punilla','Valle de Calamuchita','Valle de Traslasierra','Nodos Agroindustriales','Nodos Regionales Norte'] %}<option value="{{ k }}">{% endfor %}
+    </datalist>
+    <div class="fila">
+      <div><label for="latitud">Latitud</label><input id="latitud" name="latitud" type="number" step="0.0000001" required value="{{ c.latitud if c else '' }}"></div>
+      <div><label for="longitud">Longitud</label><input id="longitud" name="longitud" type="number" step="0.0000001" required value="{{ c.longitud if c else '' }}"></div>
+    </div>
+    <label for="poblacion">Población (aprox.)</label>
+    <input id="poblacion" name="poblacion" type="number" min="0" value="{{ c.poblacion if c and c.poblacion else '' }}">
+    <div class="acciones">
+      <button class="btn" type="submit">Guardar</button>
+      <a class="btn btn-borde" href="{{ url_for('admin_ciudades') }}">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titulo %}Resumen provincial{% endblock %}
+{% block contenido %}
+<h1>Resumen provincial</h1>
+<p class="subtitulo">Último análisis de cada ciudad: cuáles crecieron más y cuánta vegetación se perdió.</p>
+
+<form method="get" class="tarjeta" id="form-resumen">
+  <label class="check"><input type="checkbox" name="demo" value="1" {{ 'checked' if incluir_demo }} onchange="this.form.submit()">
+    Incluir registros de prueba (valores ilustrativos)</label>
+</form>
+
+{% if totales.ciudades %}
+<div class="grid-datos">
+  <div class="dato"><b>{{ totales.ciudades }} de {{ totales.total_ciudades }}</b><span>ciudades con análisis</span></div>
+  <div class="dato"><b>{{ totales.ha_urbanizadas }} ha</b><span>nueva urbanización (estimada)</span></div>
+  <div class="dato"><b>{{ totales.ha_verdes_perdidas }} ha</b><span>vegetación perdida (estimada)</span></div>
+  <div class="dato"><b>{{ datos.clusters|length }}</b><span>clusters con datos</span></div>
+</div>
+
+<div class="tarjeta">
+  <h2>Ranking de ciudades por nueva urbanización</h2>
+  <canvas id="graf-ranking" height="260" role="img" aria-label="Gráfico de barras horizontales con las hectáreas urbanizadas por ciudad"></canvas>
+  <div class="tabla-scroll"><table>
+    <caption class="chico">Cada fila corresponde al análisis más reciente de la ciudad. Períodos distintos no son directamente comparables.</caption>
+    <thead><tr><th scope="col">#</th><th scope="col">Ciudad</th><th scope="col">Cluster</th><th scope="col">Período</th><th scope="col">Urbanizadas (ha)</th><th scope="col">Vegetación perdida (ha)</th><th scope="col">Crecimiento urbano</th><th scope="col"></th></tr></thead>
+    <tbody>
+    {% for f in datos.ciudades %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ f.ciudad }}{% if f.es_demo %} <span class="insignia">prueba</span>{% endif %}</td>
+        <td>{{ f.cluster }}</td><td>{{ f.periodo }}</td>
+        <td>{{ f.ha_urbanizadas }}</td><td>{{ f.ha_verdes_perdidas }}</td>
+        <td>{{ (f.crecimiento_pct|string + ' %') if f.crecimiento_pct is not none else '—' }}</td>
+        <td><a class="btn btn-chico" href="{{ url_for('analisis_detalle', aid=f.id) }}">Ver <span class="sr-only">{{ f.ciudad }}</span></a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</div>
+
+<div class="tarjeta">
+  <h2>Totales por cluster territorial</h2>
+  <canvas id="graf-clusters" height="240" role="img" aria-label="Gráfico de barras con las hectáreas urbanizadas y la vegetación perdida por cluster"></canvas>
+  <div class="tabla-scroll"><table>
+    <thead><tr><th scope="col">Cluster</th><th scope="col">Ciudades</th><th scope="col">Urbanizadas (ha)</th><th scope="col">Vegetación perdida (ha)</th></tr></thead>
+    <tbody>{% for c in datos.clusters %}
+      <tr><td>{{ c.cluster }}</td><td>{{ c.ciudades }}</td><td>{{ c.ha_urbanizadas }}</td><td>{{ c.ha_verdes_perdidas }}</td></tr>
+    {% endfor %}</tbody>
+  </table></div>
+</div>
+{% else %}
+<div class="tarjeta centro">
+  <p>Todavía no hay análisis reales guardados.</p>
+  <p><a class="btn" href="{{ url_for('dashboard') }}">Hacer un análisis</a>
+     <a class="btn btn-borde" href="{{ url_for('resumen', demo=1) }}">Ver con registros de prueba</a></p>
+</div>
+{% endif %}
+<script type="application/json" id="datos-resumen">{{ datos|tojson }}</script>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/resumen.js') }}?v=20261118-paleta"></script>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block titulo %}Panel de análisis{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+{% block contenido %}
+<h1>Panel de análisis urbano</h1>
+<p class="subtitulo">Analizá cómo cambió una ciudad entre dos años usando imágenes satelitales. No necesitás conocimientos técnicos: seguí los pasos y el sistema te guía.</p>
+<div class="aviso aviso-info" role="note"><strong>¿Cómo empezar?</strong> 1) Elegí una ciudad. 2) Seleccioná los años. 3) Elegí el área. 4) Presioná “Iniciar análisis”. Al terminar vas a poder comparar los mapas y leer qué cambió.</div>
+<div class="paneles">
+  <aside class="tarjeta lateral" aria-label="Parámetros del análisis">
+    <h2>Parámetros</h2>
+    <form id="form-analisis" novalidate>
+      <label for="f-cluster">Región o grupo de ciudades <span class="chico">(opcional)</span></label>
+      <select id="f-cluster">
+        <option value="">Todos los clusters</option>
+        {% for c in clusters %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+      </select>
+
+      <label for="f-buscar">Encontrar una ciudad</label>
+      <input id="f-buscar" type="search" placeholder="Ej.: Arroyito" autocomplete="off">
+
+      <label for="f-ciudad">1. ¿Qué ciudad querés analizar?</label>
+      <select id="f-ciudad" required></select>
+
+      <div class="fila">
+        <div><label for="f-ini">Año inicial</label>
+          <input id="f-ini" type="number" min="{{ anio_min }}" max="{{ anio_max }}" value="2018" required></div>
+        <div><label for="f-fin">Año final (después)</label>
+          <input id="f-fin" type="number" min="{{ anio_min }}" max="{{ anio_max }}" value="{{ anio_max - 1 }}" required></div>
+      </div>
+
+      <label for="f-estacion">3. ¿En qué época del año?</label>
+      <select id="f-estacion">
+        {% for k, v in estaciones.items() %}<option value="{{ k }}">{{ v[2] }}</option>{% endfor %}
+      </select>
+
+      <label for="f-radio">4. ¿Qué tamaño de zona querés estudiar?</label>
+      <select id="f-radio">
+        <option value="2">2 km (4 × 4 km, más rápido)</option>
+        <option value="3" selected>3 km (6 × 6 km)</option>
+        <option value="4">4 km (8 × 8 km)</option>
+        <option value="5">5 km (10 × 10 km, más lento)</option>
+      </select>
+
+      <label for="f-titulo">Nombre para guardar este análisis (opcional)</label>
+      <input id="f-titulo" type="text" maxlength="150" placeholder="Ej.: Expansión norte de la ciudad">
+
+      <p class="error-campo" id="error-form" role="alert"></p>
+      {% if puede_analizar %}
+        <button class="btn btn-bloque" id="btn-analizar" type="submit">Iniciar análisis</button>
+        <p class="chico">El sistema buscará imágenes satelitales, medirá los cambios y preparará un informe. Puede tardar unos minutos. No cierres esta página.</p>
+      {% else %}
+        <div class="aviso aviso-info">Su rol (<strong>Consultor</strong>) es de solo lectura: puede explorar el mapa y el
+          <a href="{{ url_for('historial') }}">historial</a>, pero no generar análisis nuevos.</div>
+      {% endif %}
+    </form>
+    <div id="estado" class="estado" role="status" aria-live="polite" hidden>
+      <span class="spinner" aria-hidden="true"></span> <span id="estado-texto"></span>
+    </div>
+  </aside>
+
+  <section class="mapa-col">
+    <div id="mapa" role="application" aria-label="Mapa de ciudades de Córdoba"></div>
+    <p id="enlace-detalle" class="chico" hidden></p>
+  </section>
+</div>
+
+{% include "_resultado.html" %}
+{% endblock %}
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>window.UrbaniaCfg = { csrf: "{{ csrf_token() }}", anioMin: {{ anio_min }}, anioMax: {{ anio_max }},
+  puedeAnalizar: {{ 'true' if puede_analizar else 'false' }}, urlDetalle: "{{ url_for('historial') }}" };</script>
+<script src="{{ url_for('static', filename='js/visor.js') }}?v=20261118-paleta"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}?v=20261118-paleta"></script>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Fuentes y límites{% endblock %}
+{% block contenido %}
+<h1>Fuentes de datos, método y limitaciones</h1>
+<section class="tarjeta">
+  <h2>Fuentes</h2>
+  <ul>
+    <li><strong>Imágenes:</strong> Sentinel-2 L2A (ESA/Copernicus), 10 m de resolución, consultadas en el catálogo
+      público Earth Search (STAC). Cada análisis registra satélite, fecha, identificador de escena, tile y nubosidad.</li>
+    <li><strong>CONAE:</strong> fuente complementaria de referencia (catálogo de la CONAE, productos SAOCOM/SAC-D). Su
+      descarga requiere registro y es manual, por lo que no se usa en el procesamiento automático.</li>
+    <li><strong>Mapa base:</strong> OpenStreetMap e imágenes Esri World Imagery (solo visualización).</li>
+    <li><strong>Informe:</strong> modelo Gemini de Google (IA) que interpreta las cifras y las imágenes.</li>
+  </ul>
+</section>
+<section class="tarjeta">
+  <h2>Método</h2>
+  <ol>
+    <li>Se recorta un cuadrado centrado en la ciudad (radio configurable) en dos fechas de la misma época del año.</li>
+    <li>Se calculan los índices NDVI (vegetación), NDBI (construido) y MNDWI (agua) y se clasifica cada píxel por umbrales.</li>
+    <li>Se excluyen nubes y sombras (capa SCL) y se comparan solo los píxeles válidos en ambas fechas.</li>
+    <li>La IA redacta el diagnóstico, impacto y recomendaciones a partir de esos resultados.</li>
+  </ol>
+  <p class="chico">Umbrales iniciales: {% for k, v in umbrales.items() %}{{ k }} = {{ v }}{{ '; ' if not loop.last }}{% endfor %}.</p>
+</section>
+<section class="tarjeta">
+  <h2>Accesibilidad</h2>
+  <ul>
+    <li>Tamaño de texto ajustable (A−, A, A+) y modo de <strong>alto contraste</strong>; se recuerdan en su navegador.</li>
+    <li>Colores del mapa elegidos para ser distinguibles con daltonismo; cada color además se explica con texto.</li>
+    <li>Las pestañas y las zonas de cambio se manejan con el teclado (flechas, Inicio y Fin).</li>
+    <li>Cada gráfico tiene una tabla de datos equivalente y un resumen en lenguaje simple.</li>
+    <li>Botón para <strong>escuchar</strong> el resumen y el informe (usa la voz de su dispositivo).</li>
+  </ul>
+</section>
+<section class="tarjeta">
+  <h2>Limitaciones (leer antes de usar los resultados)</h2>
+  <ul>
+    <li>Los valores son <strong>estimaciones</strong>, no mediciones confirmadas en terreno.</li>
+    <li>El suelo desnudo o los campos recién cosechados pueden confundirse con superficie construida.</li>
+    <li>Las diferencias estacionales y de fecha entre escenas afectan la vegetación detectada.</li>
+    <li>Los píxeles con nubes o sombras se excluyen: el área analizada puede ser menor al recuadro.</li>
+    <li>Resolución de 10 m: no distingue construcciones pequeñas ni espacios verdes menores a unos 100 m².</li>
+    <li>La IA puede equivocarse al interpretar: sus textos deben revisarse y no reemplazan un estudio técnico.</li>
+    <li>Sentinel-2 L2A no ofrece cobertura útil anterior a 2017 en esta región.</li>
+  </ul>
+</section>
+{% endblock %}

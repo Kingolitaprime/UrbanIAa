@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Registro{% endblock %}
+{% block contenido %}
+<section class="tarjeta formulario-chico">
+  <h1>Crear cuenta</h1>
+  <p class="chico">Las cuentas nuevas tienen rol <strong>Consultor</strong> (solo lectura). Un administrador puede asignarle otro rol.</p>
+  <form method="post" novalidate id="form-registro">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="nombre">Nombre completo</label>
+    <input id="nombre" name="nombre" type="text" required minlength="3" maxlength="100" value="{{ nombre or '' }}">
+    <label for="email">Correo electrónico</label>
+    <input id="email" name="email" type="email" required maxlength="120" value="{{ email or '' }}" autocomplete="username">
+    <label for="password">Contraseña (mínimo 8 caracteres)</label>
+    <input id="password" name="password" type="password" required minlength="8" autocomplete="new-password">
+    <label for="password2">Repetir contraseña</label>
+    <input id="password2" name="password2" type="password" required minlength="8" autocomplete="new-password">
+    <p class="error-campo" id="error-form" role="alert"></p>
+    <button class="btn btn-bloque" type="submit">Crear cuenta</button>
+  </form>
+  <p class="chico">¿Ya tiene cuenta? <a href="{{ url_for('login') }}">Ingrese</a></p>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/validar.js') }}"></script>
+{% endblock %}

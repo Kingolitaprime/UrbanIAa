@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block titulo %}Historial{% endblock %}
+{% block contenido %}
+<h1>Historial de análisis</h1>
+<form method="get" class="tarjeta filtros" id="form-filtros">
+  <div><label for="q">Buscar</label>
+    <input id="q" name="q" type="search" value="{{ filtros.get('q', '') }}" placeholder="Título o ciudad"></div>
+  <div><label for="cluster">Cluster</label>
+    <select id="cluster" name="cluster"><option value="">Todos</option>
+      {% for c in clusters %}<option value="{{ c }}" {{ 'selected' if filtros.get('cluster') == c }}>{{ c }}</option>{% endfor %}
+    </select></div>
+  <div><label for="ciudad_id">Ciudad</label>
+    <select id="ciudad_id" name="ciudad_id"><option value="">Todas</option>
+      {% for c in ciudades %}<option value="{{ c.id }}" {{ 'selected' if filtros.get('ciudad_id') == c.id|string }}>{{ c.nombre }}</option>{% endfor %}
+    </select></div>
+  <div><label for="anio">Año incluido</label>
+    <input id="anio" name="anio" type="number" min="2017" max="2100" value="{{ filtros.get('anio', '') }}"></div>
+  <div class="acciones-filtro">
+    <button class="btn" type="submit">Filtrar</button>
+    <a class="btn btn-borde" href="{{ url_for('historial') }}">Limpiar</a>
+    <a class="btn btn-borde" href="{{ url_for('historial_csv', **filtros) }}">Exportar CSV</a>
+  </div>
+</form>
+
+{% if pag.items %}
+<div class="tabla-scroll"><table>
+  <thead><tr><th>Título</th><th>Ciudad</th><th>Período</th><th>Urbanizadas (ha)</th><th>Verde perdido (ha)</th><th>Autor</th><th>Fecha</th><th></th></tr></thead>
+  <tbody>
+  {% for a in pag.items %}
+    <tr>
+      <td>{{ a.titulo }}{% if a.es_demo %} <span class="insignia">prueba</span>{% endif %}</td>
+      <td>{{ a.ciudad.nombre }}<br><span class="chico">{{ a.ciudad.cluster }}</span></td>
+      <td>{{ a.ano_inicio }}–{{ a.ano_fin }}</td>
+      <td>{{ a.ha_urbanizadas }}</td>
+      <td>{{ a.ha_verdes_perdidas }}</td>
+      <td>{{ a.usuario.nombre }}</td>
+      <td>{{ a.fecha_analisis.strftime('%d/%m/%Y') }}</td>
+      <td class="acciones-tabla">
+        <a class="btn btn-chico" href="{{ url_for('analisis_detalle', aid=a.id) }}">Ver</a>
+        {% if puede_modificar(a) %}
+        <form method="post" action="{{ url_for('analisis_eliminar', aid=a.id) }}" class="en-linea" data-confirmar="¿Eliminar este análisis?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+<nav class="paginacion" aria-label="Paginación">
+  {% if pag.has_prev %}<a class="btn btn-chico btn-borde" href="{{ url_for('historial', pagina=pag.prev_num, **filtros) }}">← Anterior</a>{% endif %}
+  <span>Página {{ pag.page }} de {{ pag.pages or 1 }} · {{ pag.total }} análisis</span>
+  {% if pag.has_next %}<a class="btn btn-chico btn-borde" href="{{ url_for('historial', pagina=pag.next_num, **filtros) }}">Siguiente →</a>{% endif %}
+</nav>
+{% else %}
+  <div class="tarjeta centro"><p>No hay análisis que coincidan con los filtros.</p></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/validar.js') }}"></script>{% endblock %}

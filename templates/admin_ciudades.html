@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Ciudades{% endblock %}
+{% block contenido %}
+<h1>Ciudades monitoreadas</h1>
+<p><a class="btn" href="{{ url_for('admin_ciudad_form') }}">+ Nueva ciudad</a></p>
+<div class="tabla-scroll"><table>
+  <thead><tr><th>Ciudad</th><th>Departamento</th><th>Cluster</th><th>Lat</th><th>Lng</th><th>Población (aprox.)</th><th></th></tr></thead>
+  <tbody>
+  {% for c in ciudades %}
+    <tr>
+      <td>{{ c.nombre }}</td><td>{{ c.departamento.nombre }}</td><td>{{ c.cluster }}</td>
+      <td>{{ c.latitud }}</td><td>{{ c.longitud }}</td><td>{{ c.poblacion or '—' }}</td>
+      <td class="acciones-tabla">
+        <a class="btn btn-chico" href="{{ url_for('admin_ciudad_form', cid=c.id) }}">Editar</a>
+        <form method="post" action="{{ url_for('admin_ciudad_eliminar', cid=c.id) }}" class="en-linea" data-confirmar="¿Eliminar {{ c.nombre }} y todos sus análisis?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/validar.js') }}"></script>{% endblock %}

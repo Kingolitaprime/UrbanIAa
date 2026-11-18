@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block titulo %}UrbanIA Córdoba{% endblock %} · UrbanIA Córdoba</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}?v=20261118-paleta">
+  <script>
+    /* Aplica las preferencias de accesibilidad antes de pintar la página (evita parpadeo). */
+    try {
+      var _f = parseInt(localStorage.getItem('urb_fuente') || '100', 10);
+      if (_f >= 90 && _f <= 160) document.documentElement.style.fontSize = _f + '%';
+      if (localStorage.getItem('urb_contraste') === '1') document.documentElement.setAttribute('data-contraste', 'alto');
+    } catch (e) {}
+  </script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+<div class="a11y" role="region" aria-label="Opciones de accesibilidad">
+  <span class="a11y-titulo">Accesibilidad:</span>
+  <button type="button" class="btn-a11y" id="a11y-menos" aria-label="Reducir tamaño del texto">A−</button>
+  <button type="button" class="btn-a11y" id="a11y-normal" aria-label="Tamaño de texto normal">A</button>
+  <button type="button" class="btn-a11y" id="a11y-mas" aria-label="Aumentar tamaño del texto">A+</button>
+  <button type="button" class="btn-a11y" id="a11y-contraste" aria-pressed="false">Alto contraste</button>
+</div>
+<header class="barra">
+  <a class="marca" href="{{ url_for('inicio') }}">Urban<span>IA</span> Córdoba</a>
+  <input type="checkbox" id="menu-toggle" class="menu-toggle" aria-label="Abrir menú">
+  <label for="menu-toggle" class="hamburguesa" aria-hidden="true">☰</label>
+  <nav class="menu" aria-label="Principal">
+    {% if usuario %}
+      <a href="{{ url_for('dashboard') }}">Panel de análisis</a>
+      <a href="{{ url_for('historial') }}">Historial</a>
+      <a href="{{ url_for('resumen') }}">Resumen</a>
+      {% if usuario.rol.nombre == ROL_ADMIN %}
+        <a href="{{ url_for('admin_usuarios') }}">Usuarios</a>
+        <a href="{{ url_for('admin_ciudades') }}">Ciudades</a>
+      {% endif %}
+      <a href="{{ url_for('acerca') }}">Fuentes y límites</a>
+      <span class="usuario">{{ usuario.nombre }} · <em>{{ usuario.rol.nombre }}</em></span>
+      <form method="post" action="{{ url_for('logout') }}" class="en-linea">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button class="btn btn-chico btn-borde" type="submit">Salir</button>
+      </form>
+    {% else %}
+      <a href="{{ url_for('acerca') }}">Fuentes y límites</a>
+      <a href="{{ url_for('login') }}">Ingresar</a>
+      <a href="{{ url_for('registro') }}">Registrarse</a>
+    {% endif %}
+  </nav>
+</header>
+<main id="contenido" class="contenedor">
+  {% with mensajes = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in mensajes %}
+      <div class="aviso aviso-{{ cat }}" role="alert">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+  {% block contenido %}{% endblock %}
+</main>
+<footer class="pie">
+  UrbanIA Córdoba · Trabajo Final Integrador – Aplicaciones Informáticas ·
+  Las cifras son <strong>estimaciones</strong> por teledetección, no mediciones confirmadas.
+</footer>
+<script src="{{ url_for('static', filename='js/accesibilidad.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

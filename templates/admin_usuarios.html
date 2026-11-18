@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titulo %}Usuarios{% endblock %}
+{% block contenido %}
+<h1>Administración de usuarios</h1>
+<div class="tabla-scroll"><table>
+  <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Estado</th><th>Alta</th><th>Acciones</th></tr></thead>
+  <tbody>
+  {% for u in usuarios %}
+    <tr>
+      <td>{{ u.nombre }}</td><td>{{ u.email }}</td>
+      <td>
+        <form method="post" action="{{ url_for('admin_usuario_rol', uid=u.id) }}" class="en-linea">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <select name="rol_id" aria-label="Rol de {{ u.nombre }}" {{ 'disabled' if u.id == usuario.id }}>
+            {% for r in roles %}<option value="{{ r.id }}" {{ 'selected' if r.id == u.rol_id }}>{{ r.nombre }}</option>{% endfor %}
+          </select>
+          {% if u.id != usuario.id %}<button class="btn btn-chico" type="submit">Cambiar</button>{% endif %}
+        </form>
+      </td>
+      <td>{{ 'Activo' if u.activo else 'Inactivo' }}</td>
+      <td>{{ u.fecha_registro.strftime('%d/%m/%Y') }}</td>
+      <td class="acciones-tabla">
+        {% if u.id != usuario.id %}
+        <form method="post" action="{{ url_for('admin_usuario_activo', uid=u.id) }}" class="en-linea">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-chico btn-borde" type="submit">{{ 'Desactivar' if u.activo else 'Activar' }}</button>
+        </form>
+        <form method="post" action="{{ url_for('admin_usuario_eliminar', uid=u.id) }}" class="en-linea" data-confirmar="¿Eliminar a {{ u.nombre }} y todos sus análisis?">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-chico btn-peligro" type="submit">Eliminar</button>
+        </form>
+        {% else %}<span class="chico">(usted)</span>{% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/validar.js') }}"></script>{% endblock %}
